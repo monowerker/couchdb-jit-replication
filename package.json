@@ -1,0 +1,20 @@
+{
+  "name": "couchdb-jit-replication",
+  "version": "0.0.1",
+  "description": "CouchDB _db_updates follower that fires off one-shot replications to a database in response to changes",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/monowerker/couchdb-jit-replication"
+  },
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "author": "Daniel Ericsson <monowerker@gmail.com>",
+  "license": "ISC",
+  "dependencies": {
+    "minimist": "^1.1.1",
+    "nano": "^6.1.4"
+  }
+}
