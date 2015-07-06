@@ -3,14 +3,31 @@
 var argv = require('minimist')(process.argv.slice(2));
 
 var targetDB = argv.db || docs();
-var host = argv._[0] || docs();
+var hostURL = argv._[0] || docs();
 var prefixes = argv.prefix;
 
 if (prefixes) {
   prefixes = prefixes.split(',');
 }
 
-var nano = require('nano')(host);
+var setHostURLCredentialsFromEnvironment = function(hostURL, env) {
+  var url = require('url');
+
+  var username = env.COUCH_USERNAME;
+  var password = env.COUCH_PASSWORD;
+
+  if (!username || !password) {
+    return hostURL;
+  }
+
+  var URL = url.parse(hostURL);
+
+  URL.auth = username + ':' + password;
+
+  return url.format(URL);
+};
+
+var nano = require('nano')(setHostURLCredentialsFromEnvironment(hostURL, process.env));
 var feed = nano.followUpdates({});
 
 var replicate = function(source, target) {
