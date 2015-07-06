@@ -29,10 +29,16 @@ feed.on('change', function(change) {
       return;
     }
 
+    var callback = function(error, body) {
+      if (error) {
+        return console.log(error, body);
+      }
+    };
+
     if (prefixes) {
       for (var prefix of prefixes) {
         if (dbName.indexOf(prefix) === 0) {
-          return replicate(dbName, targetDB);
+          return replicate(dbName, targetDB, {create_target: true}, callback);
         }
       }
     }
