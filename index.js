@@ -1,3 +1,4 @@
+/* global process */
 /* jshint esnext: true */
 
 var argv = require('minimist')(process.argv.slice(2));
@@ -17,23 +18,29 @@ var setHostURLCredentialsFromEnvironment = function(hostURL, env) {
   var password = env.COUCH_PASSWORD;
 
   if (!username || !password) {
+    console.log('Using URL credentials');
+    
     return hostURL;
   }
 
   var URL = url.parse(hostURL);
 
   URL.auth = username + ':' + password;
-
+  console.log('Using environment credentials');
+  
   return url.format(URL);
 };
 
-var nano = require('nano')(setHostURLCredentialsFromEnvironment(hostURL, process.env));
+var hostURL = setHostURLCredentialsFromEnvironment(hostURL, process.env);
+var nano = require('nano')(hostURL);
 var feed = nano.followUpdates({});
 
 var replicate = function(source, target) {
-  nano.db.replicate(source, target, { create_target:true }, function(error, body) {
+  return nano.db.replicate(source, target, { create_target:true }, function(error, body) {
     if (error) {
-      return console.log(error);
+      return console.log(error, body);
+    } else {
+      console.log('Started replication of: ' +source+ ' to: ' + target, body);
     }
   });
 };
@@ -46,16 +53,10 @@ feed.on('change', function(change) {
       return;
     }
 
-    var callback = function(error, body) {
-      if (error) {
-        return console.log(error, body);
-      }
-    };
-
     if (prefixes) {
       for (var prefix of prefixes) {
         if (dbName.indexOf(prefix) === 0) {
-          return replicate(dbName, targetDB, {create_target: true}, callback);
+          return replicate(dbName, targetDB);
         }
       }
     }
